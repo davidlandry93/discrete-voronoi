@@ -13,8 +13,8 @@ int main(int argc, char** argv) {
 
     std::cout << "Hello world" << std::endl;
 
-    int N_SITES = 100;
-    int HEIGHT = 1024;
+    int N_SITES = 1000;
+    int HEIGHT = 2048;
     int WIDTH = 1024;
 
     std::default_random_engine generator;
@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     auto end = std::chrono::steady_clock::now();
     std::cout << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
 
-    // dv.print_diagram();
+    //dv.print_diagram();
 
     return 0;
 }

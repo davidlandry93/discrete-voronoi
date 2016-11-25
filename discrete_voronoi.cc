@@ -35,8 +35,11 @@ void DiscreteVoronoi::compute() {
     init_empty_diagram();
 
         for(Site site : sites) {
+#pragma acc kernels
+            {
             init_diagram_of_site(site);
             merge_diagrams();
+            }
         }
 }
 
