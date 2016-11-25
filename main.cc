@@ -3,11 +3,14 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include <chrono>
 
 #include "site.h"
 #include "discrete_voronoi.h"
 
 int main(int argc, char** argv) {
+    auto start = std::chrono::steady_clock::now();
+
     std::cout << "Hello world" << std::endl;
 
     int N_SITES = 100;
@@ -31,6 +34,11 @@ int main(int argc, char** argv) {
 
     DiscreteVoronoi dv(HEIGHT, WIDTH, sites);
     dv.compute();
+
+    auto end = std::chrono::steady_clock::now();
+    std::cout << "Execution time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
+
+    // dv.print_diagram();
 
     return 0;
 }
