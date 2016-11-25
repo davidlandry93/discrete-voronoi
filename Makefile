@@ -1,7 +1,7 @@
 
 CXX=pgc++
 
-CXX_FLAGS=-std=c++11
+CXX_FLAGS=-std=c++11 -ta=tesla:managed
 SOURCES=main.cc discrete_voronoi.cc
 OBJECTS=$(subst .cc,.o,${SOURCES})
 

@@ -10,17 +10,19 @@
 class DiscreteVoronoi {
 public:
     DiscreteVoronoi(int space_height, int space_width, std::vector<Site>& sites);
+    ~DiscreteVoronoi();
     void compute();
     void print_diagram() const;
 
 private:
     int height, width;
     std::vector<Site> sites;
-    std::vector<Pixel> diagram;
+    int *closest_site, *temp_closest_site;
+    float *distance, *temp_distance;
 
-    std::vector<Pixel> create_default_diagram() const;
-    void init_diagram_of_site(const Site& site, std::vector<Pixel>& out);
-    void merge_diagrams(const std::vector<Pixel>& lhs, const std::vector<Pixel>& rhs, std::vector<Pixel>& out);
+    void init_empty_diagram();
+    void init_diagram_of_site(const Site& site);
+    void merge_diagrams();
 };
 
 #endif
