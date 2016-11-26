@@ -6,67 +6,53 @@
 #include "pixel.h"
 #include "discrete_voronoi.h"
 
-DiscreteVoronoi::DiscreteVoronoi(int space_height, int space_width, std::vector<Site>& sites)
-    : height(space_height), width(space_width), sites(std::move(sites)) {
+DiscreteVoronoi::DiscreteVoronoi(int space_height, int space_width, std::vector<Site>& _sites)
+    : height(space_height), width(space_width), n_sites(_sites.size()) {
     closest_site = new int[height*width];
-    temp_closest_site = new int[height*width];
     distance = new float[height*width];
-    temp_distance = new float[height*width];
+    sites = new Site[n_sites];
+
+    for(int i=0; i < n_sites; i++) {
+        sites[i] = _sites[i];
+    }
 
 #pragma acc enter data create(closest_site[0:height*width])
-#pragma acc enter data create(temp_closest_site[0:height*width])
 #pragma acc enter data create(distance[0:height*width])
-#pragma acc enter data create(temp_distance[0:height*width])
+#pragma acc enter data create(sites[0:n_sites])
 }
 
 DiscreteVoronoi::~DiscreteVoronoi() {
 #pragma acc exit data delete(closest_site[0:height*width])
 #pragma acc exit data delete(distance[0:height*width])
-#pragma acc exit data delete(temp_distance[0:height*width])
-#pragma acc exit data delete(temp_closest_site[0:height*width])
+#pragma acc exit data delete(sites[0:n_sites])
 
-    delete [] temp_closest_site;
-    delete [] temp_distance;
     delete [] closest_site;
     delete [] distance;
+    delete [] sites;
 }
 
 void DiscreteVoronoi::compute() {
-    init_empty_diagram();
+    #pragma acc kernels
+    {
+        for(int i = 0; i < width*height; i++) {
+            float min_distance = std::numeric_limits<float>::infinity();
+            int best_site = std::numeric_limits<int>::max();
 
-        for(Site site : sites) {
-#pragma acc kernels
-            {
-            init_diagram_of_site(site);
-            merge_diagrams();
+            int i_of_pixel = i / width;
+            int j_of_pixel = i % width;
+
+            for(int j = 0; j < n_sites; j++) {
+                float distance_to_site = std::sqrt((sites[j].i - i_of_pixel) * (sites[j].i - i_of_pixel) +
+                                                   (sites[j].j - j_of_pixel) * (sites[j].j - j_of_pixel));
+
+                if(distance_to_site < min_distance) {
+                    min_distance = distance_to_site;
+                    best_site = j;
+                }
             }
-        }
-}
 
-void DiscreteVoronoi::init_diagram_of_site(const Site& site) {
-    for(int i=0; i < height*width; i++) {
-        int i_of_pixel = i / width;
-        int j_of_pixel = i % width;
-
-        temp_closest_site[i] = site.index;
-        temp_distance[i] = std::sqrt((site.i - i_of_pixel) * (site.i - i_of_pixel) +
-                                                   (site.j - j_of_pixel) * (site.j - j_of_pixel));
-
-    }
-}
-
-void DiscreteVoronoi::init_empty_diagram() {
-    for(int i=0; i < width*height; i++) {
-        distance[i] = std::numeric_limits<float>::infinity();
-        closest_site[i] = std::numeric_limits<int>::max();
-    }
-}
-
-void DiscreteVoronoi::merge_diagrams() {
-    for(int i=0; i < width*height; i++) {
-        if(distance[i] > temp_distance[i]) {
-            distance[i] = temp_distance[i];
-            closest_site[i] = temp_closest_site[i];
+            closest_site[i] = best_site;
+            distance[i] = min_distance;
         }
     }
 }

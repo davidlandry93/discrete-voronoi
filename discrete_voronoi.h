@@ -16,13 +16,10 @@ public:
 
 private:
     int height, width;
-    std::vector<Site> sites;
-    int *closest_site, *temp_closest_site;
-    float *distance, *temp_distance;
-
-    void init_empty_diagram();
-    void init_diagram_of_site(const Site& site);
-    void merge_diagrams();
+    int n_sites;
+    int *closest_site;
+    float *distance;
+    Site *sites;
 };
 
 #endif
